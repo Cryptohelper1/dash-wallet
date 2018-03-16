@@ -36,6 +36,7 @@ import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.core.VersionedChecksummedBytes;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
+import org.bitcoinj.wallet.DeterministicKeyChain;
 import org.bitcoinj.wallet.Wallet;
 import org.bitcoinj.wallet.Wallet.BalanceType;
 
@@ -769,6 +770,18 @@ public final class WalletActivity extends AbstractBindServiceActivity
             };
 
             dialog.show();
+        }
+
+        // if wallet is encrypted, but active keychain isn't, then we have just upgraded
+        // the wallet to include BIP44.  Have the user reset their PIN so both keychains
+        // are encrypted.
+        if(wallet.isEncrypted())
+        {
+            DeterministicKeyChain activeKeyChain = wallet.getActiveKeyChain();
+            if(!activeKeyChain.getWatchingKey().isEncrypted())
+            {
+                handleEncryptKeys();
+            }
         }
     }
 
